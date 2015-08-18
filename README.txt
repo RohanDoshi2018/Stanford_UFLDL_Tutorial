@@ -1,8 +1,10 @@
 Author: Rohan Doshi
-Date: 8/9/15
+Date: August 18th, 2015
 
 In these folders you will find my solutions to the programming challenges
-from Stanford's UFLDL online tutorial:
+from Stanford's UFLDL (Unsupervised Feature Learning and Deep Learning) 
+online tutorial on DNNs (deep learning neural networks) and CNNs
+(convolutional neural networks):
 
 http://deeplearning.stanford.edu/wiki/index.php/UFLDL_Tutorial
 
