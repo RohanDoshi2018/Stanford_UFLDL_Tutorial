@@ -2,7 +2,8 @@
 % This program applies various pre-processing steps to some sample
 % data such as PCA and whitening.
 clf; close all; clear all;
-%%================================================================
+
+%%=========================================================================
 %% Step 0: Load data
 % We have provided the code to load data from pcaData.txt into x.
 % x is a 2 * 45 matrix, where the kth column x(:,k) corresponds to
@@ -12,7 +13,8 @@ x = load('pcaData.txt','-ascii');
 figure(1);
 scatter(x(1, :), x(2, :));
 title('Raw data');
-%%================================================================
+
+%%=========================================================================
 %% Step 1a: Implement PCA to obtain U 
 % Implement PCA to obtain the rotation matrix U, which is the eigenbasis
 % sigma. 
@@ -26,7 +28,8 @@ plot([0 U(1,1)], [0 U(2,1)]);
 plot([0 U(1,2)], [0 U(2,2)]);
 scatter(x(1, :), x(2, :));
 hold off
-%%================================================================
+
+%%=========================================================================
 %% Step 1b: Compute xRot, the projection on to the eigenbasis
 % Now, compute xRot by projecting the data on to the basis defined
 % by U. Visualize the points by performing a scatter plot.
@@ -37,7 +40,8 @@ xRot = (U' * x); % rotated version of the data
 figure(2);
 scatter(xRot(1, :), xRot(2, :));
 title('xRot');
-%%================================================================
+
+%%=========================================================================
 %% Step 2: Reduce the number of dimensions from 2 to 1. 
 % Compute xRot again (this time projecting to 1 dimension).
 % Then, compute xHat by projecting the xRot back onto the original axes 
@@ -48,7 +52,8 @@ xHat = U(:,1:k)' * x; % reduced dimension representation of the data,
 figure(3);
 scatter(xHat(1, :), xHat(1, :));
 title('xHat');
-%%================================================================
+
+%%=========================================================================
 %% Step 3: PCA Whitening
 %  Complute xPCAWhite
 epsilon = 1e-5;
@@ -58,7 +63,8 @@ xPCAWhite = diag(1./sqrt(diag(S) + epsilon)) * xRot;
 figure(4);
 scatter(xPCAWhite(1, :), xPCAWhite(2, :));
 title('xPCAWhite');
-%%================================================================
+
+%%=========================================================================
 %% Step 3: ZCA Whitening
 % Complute xZCAWhite.
 xZCAWhite = U * xPCAWhite;

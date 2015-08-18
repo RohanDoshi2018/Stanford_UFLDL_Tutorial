@@ -2,6 +2,7 @@
 % This program applies a softmax classifer to MNIST image patches directly.
 % It trains on labeled data and makes predictions during testing.
 clf; close all; clear all;
+
 %%=========================================================================
 %% STEP 0: DECLARE PARAMETERS
 inputSize = 28 * 28; % Size of input vector (MNIST images are 28x28)
@@ -9,6 +10,7 @@ numClasses = 10;     % Number of classes (MNIST images fall into 10 classes)
 lambda = 1e-4;       % Weight decay parameter
 softmaxMaxIter = 100;% Max # of iterations to train classifier
 DEBUG = false;       % if true, apply gradient checking
+
 %%=========================================================================
 %% STEP 1: LOAD DATA
 % load training images and labels
@@ -17,7 +19,8 @@ trainLabels = loadMNISTLabels('/mnist/train-labels-idx1-ubyte');
 trainLabels(trainLabels==0) = 10; % Remap 0 to 10
 
 % Randomly initialise theta
-theta = 0.005 * randn(numClasses * inputSize, 1);                               
+theta = 0.005 * randn(numClasses * inputSize, 1);    
+
 %%=========================================================================
 %% STEP 2: GRADIENT CHECKING
 % Compare the analytical and numerical gradient and check if they are the
@@ -37,6 +40,7 @@ if DEBUG
     disp(diff); % Should be small. In our implementation, these values are
                 % usually less than 1e-9.
 end
+
 %%=========================================================================
 %% STEP 3: SOFTMAX CLASSIFIER TRAINING
                                        
@@ -50,6 +54,7 @@ options.maxIter = softmaxMaxIter;
     inputSize, lambda, trainImages, trainLabels), theta, options);                       
 
 softmaxOptTheta = reshape(softmaxOptTheta, numClasses, inputSize);
+
 %%=========================================================================
 %% STEP 4: TESTING
 % Test the trainined softmax model of 10k test samples.

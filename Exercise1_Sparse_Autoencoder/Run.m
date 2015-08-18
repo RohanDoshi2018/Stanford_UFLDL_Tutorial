@@ -12,6 +12,7 @@ lambda = 0.0001;     % weight decay parameter
 beta = 3;            % weight of sparsity penalty term     
 nPatches = 10000;    % number of patches to be taken from sample images
 DEBUG = false;       % debug mode checks the gradient of the cost function
+
 %%=========================================================================
 %% STEP 1: GATHER IMAGE PATCHES
 % Data will be retrieved using sampleImages.m. Then, 200 random
@@ -21,6 +22,7 @@ display_network(patches(:,randi(size(patches,2),200,1)),8);
 
 % Randomly initiaize weight and bias parameters
 theta = initializeParameters(hiddenSize, visibleSize);
+
 %%=========================================================================
 %% STEP 2: GRADIENT CHECKING
 % Confirm that sparseAutoencoderCost.m provides the same gradient 
@@ -44,6 +46,7 @@ if DEBUG
     disp(diff); % Should be small. In our implementation, these values are
                 % usually less than 1e-9.
 end
+
 %%=========================================================================
 %% STEP 3: TRAIN THE SPARSE AUTOENCODER
 %  Use minFunc to minimize the function
@@ -55,6 +58,7 @@ options.display = 'on';
 [opttheta, cost] = minFunc( @(p) sparseAutoencoderCost(p, ...
     visibleSize, hiddenSize, lambda, sparsityParam, beta, patches), ...
     theta, options);
+
 %%=========================================================================
 %% STEP 4: VISUALIZATION
 % Visualize the weights responsible for forming the hidden layer

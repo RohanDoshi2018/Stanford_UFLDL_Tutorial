@@ -10,6 +10,7 @@ sparsityParam = 0.1; % desired average activation of the hidden units.
 lambda = 3e-3;       % weight decay parameter       
 beta = 3;            % weight of sparsity penalty term     
 DEBUG = false;       % set DEBUG to true for gradient checking
+
 %%======================================================================
 %% STEP 1: PREPARE TRAINING IMAGES
 images = loadMNISTImages('train-images-idx3-ubyte');
@@ -24,6 +25,7 @@ disp(labels(1:10));
 
 %  Obtain random parameters theta
 theta = initializeParameters(hiddenSize, visibleSize);
+
 %%=========================================================================
 %% STEP 2: GRADIENT CHECKING
 % Confirm that sparseAutoencoderCost.m provides the same gradient 
@@ -47,6 +49,7 @@ if DEBUG
     disp(diff); % Should be small. In our implementation, these values are
                 % usually less than 1e-9.
 end
+
 %%=========================================================================
 %% STEP 3: TRAIN THE SPARSE AUTOENCODER
 %  Use minFunc to minimize the function
@@ -58,6 +61,7 @@ options.display = 'on';
 [opttheta, cost] = minFunc( @(p) sparseAutoencoderCost(p, ...
     visibleSize, hiddenSize, lambda, sparsityParam, beta, patches), ...
     theta, options);
+
 %%=========================================================================
 %% STEP 4: VISUALIZATION
 % Visualize the weights responsible for forming the hidden layer

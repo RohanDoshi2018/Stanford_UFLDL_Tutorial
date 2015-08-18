@@ -3,6 +3,7 @@
 % with a softmax classifier. The overall task is to identify handwritten
 % digits.
 clf; close all; clear all;
+
 %% ========================================================================
 %%  STEP 0: DECLARE PARAMETERS
 createFeatures = 0;
@@ -15,6 +16,7 @@ lambdaClassifier = 1e-4;  % weight decay for softmax classifier
 beta = 3;                 % weight of sparsity penalty term
 AEmaxIter = 400;           % max # iterations for autoencoder
 classifierMaxIter = 100;  % max # iterations for softmax classifer
+
 %% ========================================================================
 %%  STEP 1: LOAD DATA
 % Load training and testing data from the MNIST database files. Then, 
@@ -71,6 +73,7 @@ options.maxIter = AEmaxIter;
 % Visualize weights
 W1 = reshape(opttheta(1:hiddenSize * inputSize), hiddenSize, inputSize);
 display_network(W1');
+
 %%======================================================================
 %% STEP 3: EXTRACT FEATURES FROM SUPERVISED LABELED DATASET
 % Use weights learned from unlabeled data to forward propogate
@@ -81,6 +84,7 @@ trainFeatures = feedForwardAutoencoder(opttheta, hiddenSize, inputSize, ...
 
 testFeatures = feedForwardAutoencoder(opttheta, hiddenSize, inputSize, ...
 	testData);
+
 %%======================================================================
 %% STEP 4: TRAIN SOFTMAX CLASSIFIER
 % Use the labeled training data to train the classifier for handwritten
@@ -97,6 +101,7 @@ options.maxIter = classifierMaxIter;
 
 % reshape parameters from vector into matrix
 softmaxOptTheta = reshape(softmaxOptTheta, numLabels, hiddenSize);
+
 %%======================================================================
 %% STEP 5: Testing 
 % Test trained softmax classifier on the extracted features from the test
