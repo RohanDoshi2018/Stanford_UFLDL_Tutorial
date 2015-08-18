@@ -103,7 +103,7 @@ options.maxIter = classifierMaxIter;
 softmaxOptTheta = reshape(softmaxOptTheta, numLabels, hiddenSize);
 
 %%======================================================================
-%% STEP 5: Testing 
+%% STEP 5: TESTING
 % Test trained softmax classifier on the extracted features from the test
 % data. Then, calculate the prediction's accuracy.
 M = softmaxOptTheta * testFeatures;
