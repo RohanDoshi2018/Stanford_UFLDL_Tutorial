@@ -3,6 +3,8 @@
 % It features a gradient checking safeguard to ensure the cost function
 % calld by the optimiation function each iteration provides the corrct 
 % cost and gradient.
+clf; close all; clear all;
+
 %%=========================================================================
 %% STEP 0: SELECT PARAMETERS
 visibleSize = 8*8;   % number of input units 

@@ -14,7 +14,7 @@ sparsityParam = 0.1;      % desired average activation of the hidden units
 lambdaAE = 3e-3;          % weight decay parameter for autoencoder
 lambdaClassifier = 1e-4;  % weight decay for softmax classifier
 beta = 3;                 % weight of sparsity penalty term
-AEmaxIter = 400;           % max # iterations for autoencoder
+AEmaxIter = 400;          % max # iterations for autoencoder
 classifierMaxIter = 100;  % max # iterations for softmax classifer
 
 %% ========================================================================

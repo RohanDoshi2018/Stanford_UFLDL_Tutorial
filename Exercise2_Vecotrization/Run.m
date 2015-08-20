@@ -2,6 +2,8 @@
 % This is a vectorized version of a sparse autoencoder. We train on the 
 % MNIST handwritten digit dataset and visualize feature extraction
 % on top of the testing images.
+clf; close all; clear all;
+
 %%======================================================================
 %% STEP 0: SELECT PARAMETERS
 visibleSize = 28*28; % number of input units 
