@@ -52,7 +52,7 @@ SparsityPenaltyTerm = sparsityParam * log(sparsityParam ./ pj) + ...
 SparsityPenaltyTerm = beta * sum(SparsityPenaltyTerm);
 cost = SquareError + WeightDecayTerm + SparsityPenaltyTerm;
 
-% perform back-propogation
+% back-propagation of the error (a.k.a 'delta')
 delta3 = -(data-a3) .* sigmoidPrime(z3);
 delta2SparsityTerm = beta .* (-sparsityParam ./pj + (1-sparsityParam) ...
     ./(1-pj));
@@ -64,7 +64,6 @@ W2grad = (W2grad + delta3 * a2') ./ numpatches + lambda .* W2;
 W1grad = (W1grad + delta2 * a1') ./ numpatches + lambda .* W1;
 b2grad = sum(delta3, 2) ./ numpatches;
 b1grad = sum(delta2, 2)./ numpatches;
-
 
 % flatten all gradients matrices into a single vector 
 grad = [W1grad(:) ; W2grad(:) ; b1grad(:) ; b2grad(:)];

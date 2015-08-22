@@ -6,7 +6,6 @@ clf; close all; clear all;
 
 %% ========================================================================
 %%  STEP 0: DECLARE PARAMETERS
-createFeatures = 0;
 inputSize  = 28 * 28;     % # of input nodes
 numLabels  = 5;           % number of output labels
 hiddenSize = 200;         % hidden size of autoencoder
@@ -30,15 +29,15 @@ mnistLabels = loadMNISTLabels('mnist/train-labels-idx1-ubyte');
 % Create a labeled set (0 to 4). Split labeled data into train and test
 % set for softmax classifier
 
-labeledSet   = find(mnistLabels >= 0 & mnistLabels <= 4);
+labeledSet = find(mnistLabels >= 0 & mnistLabels <= 4);
 
 numTrain = round(numel(labeledSet)/2); 
 trainSet = labeledSet(1:numTrain); % Set ==> array of indices
-trainData   = mnistData(:, trainSet);
+trainData = mnistData(:, trainSet);
 trainLabels = mnistLabels(trainSet)' + 1; % Shift Labels to the Range 1-5
 
-testSet  = labeledSet(numTrain+1:end); % Set ==> array of indices
-testData   = mnistData(:, testSet);
+testSet = labeledSet(numTrain+1:end); % Set ==> array of indices
+testData = mnistData(:, testSet);
 testLabels = mnistLabels(testSet)' + 1;   % Shift Labels to the Range 1-5
 
 % Create an unlabeled set (5 to 9) for training the sparse autoencoder for
@@ -53,9 +52,9 @@ fprintf('# examples in supervised training set: %d\n', size(trainData, 2));
 fprintf('# examples in supervised testing set: %d\n', size(testData, 2));
 
 %% ========================================================================
-%% STEP 2: TRAIN THE SPRASE ENCODER
+%% STEP 2: TRAIN THE SPRASE AUTOENCODER
 %  This trains the sparse autoencoder on the unlabeled training
-%  images. . 
+%  images. 
 
 %  Randomly initialize the parameters
 theta = initializeParameters(hiddenSize, inputSize);
@@ -66,7 +65,7 @@ options.Method = 'lbfgs'; % select optimization function
 options.display = 'on';
 options.maxIter = AEmaxIter;
 
-[opttheta, cost] = minFunc( @(p) sparseAutoencoderCost(p, inputSize, ...
+[opttheta, ~] = minFunc( @(p) sparseAutoencoderCost(p, inputSize, ...
     hiddenSize, lambdaAE, sparsityParam, beta, unlabeledData), theta, ...
     options);                                 
                                  

@@ -1,11 +1,11 @@
-function [cost,grad] = sparseAutoencoderCost(theta, visibleSize, hiddenSize, ...
-                                             lambda, sparsityParam, beta, data)
+function [cost,grad] = sparseAutoencoderCost(theta, visibleSize, ...
+    hiddenSize, lambda, sparsityParam, beta, data)
 % Compute the cost (aka optimization objective) of J_sparse(W,b) to train
 % the sparse autoencoder. Then, generate the gradients to update weights(W)
 % and biases(b) contained in the "theta" input.
 %
 % Stated differently, if we were using batch gradient descent to optimize 
-% parameters, the gradient descent update would be W1 := W1 - alpha * W1grad
+% parameters, the gradient descent update is W1 := W1 - alpha * W1grad
 % for W1, with similar updates for W2, b1, b2. 
 %
 % theta: vectorized version of input parameters to optimize (W,b)
@@ -52,7 +52,7 @@ SparsityPenaltyTerm = sparsityParam * log(sparsityParam ./ pj) + ...
 SparsityPenaltyTerm = beta * sum(SparsityPenaltyTerm);
 cost = SquareError + WeightDecayTerm + SparsityPenaltyTerm;
 
-% perform back-propogation
+% back-propagation of the error (a.k.a 'delta')
 delta3 = -(data-a3) .* sigmoidPrime(z3);
 delta2SparsityTerm = beta .* (-sparsityParam ./pj + (1-sparsityParam) ...
     ./(1-pj));
@@ -64,7 +64,6 @@ W2grad = (W2grad + delta3 * a2') ./ numpatches + lambda .* W2;
 W1grad = (W1grad + delta2 * a1') ./ numpatches + lambda .* W1;
 b2grad = sum(delta3, 2) ./ numpatches;
 b1grad = sum(delta2, 2)./ numpatches;
-
 
 % flatten all gradients matrices into a single vector 
 grad = [W1grad(:) ; W2grad(:) ; b1grad(:) ; b2grad(:)];

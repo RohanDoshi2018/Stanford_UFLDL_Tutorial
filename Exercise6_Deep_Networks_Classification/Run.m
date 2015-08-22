@@ -1,110 +1,66 @@
-%% CS294A/CS294W Stacked Autoencoder Exercise
+%% Stanford UFLDL Tutorial (CS294) Ch5 Exercise
+% This program implements a deep learning neural network with fine tuning
+% for the task of digit recignition. There are four layers: an input layer,
+% two hidden layers (hence two autoencoders stacked on top of each other
+% for learning features), and a softmax classifier.
+clf; close all; clear all;
 
-%  Instructions
-%  ------------
-% 
-%  This file contains code that helps you get started on the
-%  sstacked autoencoder exercise. You will need to complete code in
-%  stackedAECost.m
-%  You will also need to have implemented sparseAutoencoderCost.m and 
-%  softmaxCost.m from previous exercises. You will need the initializeParameters.m
-%  loadMNISTImages.m, and loadMNISTLabels.m files from previous exercises.
-%  
-%  For the purpose of completing the assignment, you do not need to
-%  change the code in this file. 
-%
 %%======================================================================
-%% STEP 0: Here we provide the relevant parameters values that will
-%  allow your sparse autoencoder to get good filters; you do not need to 
-%  change the parameters below.
-
-inputSize = 28 * 28;
-numClasses = 10;
+%% STEP 0: DECLARE PARAMETERS
+inputSize = 28 * 28;   % # of input nodes
 hiddenSizeL1 = 200;    % Layer 1 Hidden Size
 hiddenSizeL2 = 200;    % Layer 2 Hidden Size
+numClasses = 10;       % number of output labels
 sparsityParam = 0.1;   % desired average activation of the hidden units.
-                       % (This was denoted by the Greek alphabet rho, which looks like a lower-case "p",
-		               %  in the lecture notes). 
 lambda = 3e-3;         % weight decay parameter       
 beta = 3;              % weight of sparsity penalty term       
 
 %%======================================================================
-%% STEP 1: Load data from the MNIST database
+%% STEP 1: LOAD DATA
 %
-%  This loads our training data from the MNIST database files.
+% This loads our training data from the MNIST database files.
 
 % Load MNIST database files
 trainData = loadMNISTImages('mnist/train-images-idx3-ubyte');
 trainLabels = loadMNISTLabels('mnist/train-labels-idx1-ubyte');
 
-trainLabels(trainLabels == 0) = 10; % Remap 0 to 10 since our labels need to start from 1
+% Remap label 0 to 10
+trainLabels(trainLabels == 0) = 10; 
+
 %%======================================================================
 %% STEP 2: Train the first sparse autoencoder
-%  This trains the first sparse autoencoder on the unlabelled STL training
-%  images.
-%  If you've correctly implemented sparseAutoencoderCost.m, you don't need
-%  to change anything here.
+% Trian the first sparse autoencoder on the unlabelled STL training
+% images.
 
-
-%  Randomly initialize the parameters
+% Randomly initialize the parameters
 sae1Theta = initializeParameters(hiddenSizeL1, inputSize);
 
-%% ---------------------- YOUR CODE HERE  ---------------------------------
-%  Instructions: Train the first layer sparse autoencoder, this layer has
-%                an hidden size of "hiddenSizeL1"
-%                You should store the optimal parameters in sae1OptTheta
-
-
-%  Use minFunc to minimize the function
+% Use minFunc to minimize the function
 addpath minFunc/
-options.Method = 'lbfgs'; % Here, we use L-BFGS to optimize our cost
-                          % function. Generally, for minFunc to work, you
-                          % need a function pointer with two outputs: the
-                          % function value and the gradient. In our problem,
-                          % sparseAutoencoderCost.m satisfies this.
-options.maxIter = 400;	  % Maximum number of iterations of L-BFGS to run 
+options.Method = 'lbfgs'; % Choose optimization method
 options.display = 'on';
 
-[SAE1opttheta, cost] = minFunc( @(p) sparseAutoencoderCost(p, ...
-                                   inputSize, hiddenSizeL1, ...
-                                   lambda, sparsityParam, ...
-                                   beta, trainData), ...
-                              sae1Theta, options);    
-
-% -------------------------------------------------------------------------
-
-
+[SAE1opttheta, ~] = minFunc( @(p) sparseAutoencoderCost(p, ...
+    inputSize, hiddenSizeL1, lambda, sparsityParam, beta, trainData), ...
+    sae1Theta, options);    
 
 %%======================================================================
-%% STEP 2: Train the second sparse autoencoder
-%  This trains the second sparse autoencoder on the first autoencoder
-%  featurse.
-%  If you've correctly implemented sparseAutoencoderCost.m, you don't need
-%  to change anything here.
+%% STEP 2: TRAIN THE SPRASE AUTOENCODER
+% This trains the second sparse autoencoder on the first autoencoder
+% features.
 
 [sae1Features] = feedForwardAutoencoder(SAE1opttheta, hiddenSizeL1, ...
                                         inputSize, trainData);
 
-%  Randomly initialize the parameters
+% Randomly initialize the parameters
 sae2Theta = initializeParameters(hiddenSizeL2, hiddenSizeL1);
 
-%% ---------------------- YOUR CODE HERE  ---------------------------------
-%  Instructions: Train the second layer sparse autoencoder, this layer has
-%                an hidden size of "hiddenSizeL2" and an inputsize of
-%                "hiddenSizeL1"
-%
-%                You should store the optimal parameters in sae2OptTheta
-
-[SAE2opttheta, cost] = minFunc( @(p) sparseAutoencoderCost(p, ...
-                                   hiddenSizeL1, hiddenSizeL2, ...
-                                   lambda, sparsityParam, ...
-                                   beta, sae1Features), ...
-                              sae2Theta, options);   
-% -------------------------------------------------------------------------
-
+[SAE2opttheta, ~] = minFunc( @(p) sparseAutoencoderCost(p, ...
+    hiddenSizeL1, hiddenSizeL2, lambda, sparsityParam, beta, ...
+    sae1Features), sae2Theta, options);
 
 %%======================================================================
-%% STEP 3: Train the softmax classifier
+%% STEP 3: TRAIN THE SOFTMAX CLASSIFIER
 %  This trains the sparse autoencoder on the second autoencoder features.
 %  If you've correctly implemented softmaxCost.m, you don't need
 %  to change anything here.
@@ -115,16 +71,6 @@ sae2Theta = initializeParameters(hiddenSizeL2, hiddenSizeL1);
 %  Randomly initialize the parameters
 saeSoftmaxTheta = 0.005 * randn(hiddenSizeL2 * numClasses, 1);
 
-
-%% ---------------------- YOUR CODE HERE  ---------------------------------
-%  Instructions: Train the softmax classifier, the classifier takes in
-%                input of dimension "hiddenSizeL2" corresponding to the
-%                hidden layer size of the 2nd layer.
-%
-%                You should store the optimal parameters in saeSoftmaxOptTheta 
-%
-%  NOTE: If you used softmaxTrain to complete this part of the exercise,
-%        set saeSoftmaxOptTheta = softmaxModel.optTheta(:);
 inputSizeClassifier = hiddenSizeL2;
 numClassesClassifier = 10;
 lambdaClassifier = 1e-4;
@@ -167,9 +113,7 @@ stackedAETheta = [ saeSoftmaxOptTheta ; stackparams ];
                                    lambda, trainData, ...
                                    trainLabels), ...
                                    stackedAETheta, options);   
-                         
-% -------------------------------------------------------------------------
-
+                       
 
 
 %%======================================================================
