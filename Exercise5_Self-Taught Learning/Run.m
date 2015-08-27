@@ -86,8 +86,8 @@ testFeatures = feedForwardAutoencoder(opttheta, hiddenSize, inputSize, ...
 
 %%======================================================================
 %% STEP 4: TRAIN SOFTMAX CLASSIFIER
-% Use the labeled training data to train the classifier for handwritten
-% digit recognition.
+% Use the labeled training data to train the classifier on the features
+% from the unsupervised autoencoder.
 
 % initialize parameters
 theta = 0.005 * randn(numLabels * hiddenSize, 1);

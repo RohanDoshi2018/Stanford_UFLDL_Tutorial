@@ -1,9 +1,11 @@
-function [a2] = feedForwardAutoencoder(theta, hiddenSize, visibleSize, data)
+function [a2] = feedForwardAutoencoder(theta, hiddenSize, visibleSize, ...
+    data)
 
 % theta: trained weights from the autoencoder
 % visibleSize: the number of input units (probably 64) 
 % hiddenSize: the number of hidden units (probably 25) 
-% data: Our matrix containing the training data as columns.  So, data(:,i) is the i-th training example. 
+% data: Our matrix containing the training data as columns.  
+%     So, data(:,i) is the i-th training example. 
   
 % reshape parameters from vector to block format
 W1 = reshape(theta(1:hiddenSize*visibleSize), hiddenSize, visibleSize);
