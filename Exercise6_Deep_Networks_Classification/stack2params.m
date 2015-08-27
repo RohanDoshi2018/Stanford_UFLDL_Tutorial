@@ -42,7 +42,8 @@ if nargout > 1
         netconfig.inputsize = size(stack{1}.w, 2);
         netconfig.layersizes = {};
         for d = 1:numel(stack)
-            netconfig.layersizes = [netconfig.layersizes ; size(stack{d}.w,1)];
+            netconfig.layersizes = ...
+                [netconfig.layersizes ; size(stack{d}.w,1)];
         end
     end
 end

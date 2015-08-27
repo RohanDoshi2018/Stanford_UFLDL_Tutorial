@@ -16,7 +16,7 @@ function stack = params2stack(params, netconfig)
 depth = numel(netconfig.layersizes);
 stack = cell(depth,1);
 prevLayerSize = netconfig.inputsize; % the size of the previous layer
-curPos = double(1);                  % mark current position in parameter vector
+curPos = double(1);                  % mark position in parameter vector
 
 for d = 1:depth
     % Create layer d
@@ -24,12 +24,14 @@ for d = 1:depth
 
     % Extract weights
     wlen = double(netconfig.layersizes{d} * prevLayerSize);
-    stack{d}.w = reshape(params(curPos:curPos+wlen-1), netconfig.layersizes{d}, prevLayerSize);
+    stack{d}.w = reshape(params(curPos:curPos+wlen-1), ...
+        netconfig.layersizes{d}, prevLayerSize);
     curPos = curPos+wlen;
 
     % Extract bias
     blen = double(netconfig.layersizes{d});
-    stack{d}.b = reshape(params(curPos:curPos+blen-1), netconfig.layersizes{d}, 1);
+    stack{d}.b = reshape(params(curPos:curPos+blen-1), ...
+        netconfig.layersizes{d}, 1);
     curPos = curPos+blen;
     
     % Set previous layer size

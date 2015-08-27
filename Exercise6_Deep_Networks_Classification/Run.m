@@ -5,29 +5,33 @@
 % for learning features), and a softmax classifier.
 clf; close all; clear all;
 
-%%======================================================================
+%%=========================================================================
 %% STEP 0: DECLARE PARAMETERS
-inputSize = 28 * 28;   % # of input nodes
-hiddenSizeL1 = 200;    % Layer 1 Hidden Size
-hiddenSizeL2 = 200;    % Layer 2 Hidden Size
-numClasses = 10;       % number of output labels
-sparsityParam = 0.1;   % desired average activation of the hidden units.
-lambda = 3e-3;         % weight decay parameter       
-beta = 3;              % weight of sparsity penalty term       
-
-%%======================================================================
+inputSize = 28 * 28;     % # of input nodes
+hiddenSizeL1 = 200;      % Layer 1 Hidden Size
+hiddenSizeL2 = 200;      % Layer 2 Hidden Size
+numClasses = 10;         % number of output labels
+sparsityParam = 0.1;     % desired average activation of the hidden units.
+lambda = 3e-3;           % weight decay parameter   
+lambdaClassifier = 1e-4; % classifier lambda
+beta = 3;                % weight of sparsity penalty term       
+AE1maxIter = 400;        % max # iterations for autoencoder
+AE2maxIter = 400;        % max # iterations for autoencoder
+classifierMaxIter = 100; % max # iterations for softmax classifer
+finetuneMaxIter = 400;   % max # iterations for finetuning
+%%=========================================================================
 %% STEP 1: LOAD DATA
 %
 % This loads our training data from the MNIST database files.
 
-% Load MNIST database files
+% Load MNIST database files: 60,000 samples
 trainData = loadMNISTImages('mnist/train-images-idx3-ubyte');
 trainLabels = loadMNISTLabels('mnist/train-labels-idx1-ubyte');
 
 % Remap label 0 to 10
 trainLabels(trainLabels == 0) = 10; 
 
-%%======================================================================
+%%=========================================================================
 %% STEP 2: Train the first sparse autoencoder
 % Trian the first sparse autoencoder on the unlabelled STL training
 % images.
@@ -39,95 +43,84 @@ sae1Theta = initializeParameters(hiddenSizeL1, inputSize);
 addpath minFunc/
 options.Method = 'lbfgs'; % Choose optimization method
 options.display = 'on';
+options.maxIter = AE1maxIter;
 
 [SAE1opttheta, ~] = minFunc( @(p) sparseAutoencoderCost(p, ...
     inputSize, hiddenSizeL1, lambda, sparsityParam, beta, trainData), ...
     sae1Theta, options);    
 
-%%======================================================================
+%%=========================================================================
 %% STEP 2: TRAIN THE SPRASE AUTOENCODER
 % This trains the second sparse autoencoder on the first autoencoder
 % features.
 
-[sae1Features] = feedForwardAutoencoder(SAE1opttheta, hiddenSizeL1, ...
+sae1Features = feedForwardAutoencoder(SAE1opttheta, hiddenSizeL1, ...
                                         inputSize, trainData);
 
 % Randomly initialize the parameters
 sae2Theta = initializeParameters(hiddenSizeL2, hiddenSizeL1);
 
+options.maxIter = AE2maxIter;
+
 [SAE2opttheta, ~] = minFunc( @(p) sparseAutoencoderCost(p, ...
     hiddenSizeL1, hiddenSizeL2, lambda, sparsityParam, beta, ...
     sae1Features), sae2Theta, options);
 
-%%======================================================================
+%%=========================================================================
 %% STEP 3: TRAIN THE SOFTMAX CLASSIFIER
 %  This trains the sparse autoencoder on the second autoencoder features.
-%  If you've correctly implemented softmaxCost.m, you don't need
-%  to change anything here.
 
-[sae2Features] = feedForwardAutoencoder(SAE2opttheta, hiddenSizeL2, ...
+sae2Features = feedForwardAutoencoder(SAE2opttheta, hiddenSizeL2, ...
                                         hiddenSizeL1, sae1Features);
 
 %  Randomly initialize the parameters
 saeSoftmaxTheta = 0.005 * randn(hiddenSizeL2 * numClasses, 1);
 
-inputSizeClassifier = hiddenSizeL2;
-numClassesClassifier = 10;
-lambdaClassifier = 1e-4;
+options.maxIter = classifierMaxIter;
 
-optionsClassifier.maxIter = 100;
-softmaxModel = softmaxTrain(inputSizeClassifier, numClassesClassifier, ... 
-                            lambdaClassifier, sae2Features, trainLabels, ...
-                            optionsClassifier);
-saeSoftmaxOptTheta = softmaxModel.optTheta(:);
-% -------------------------------------------------------------------------
+[saeSoftmaxOptTheta, ~] = minFunc( @(p) softmaxCost(p, numClasses, ...
+    hiddenSizeL2, lambdaClassifier, sae2Features, trainLabels), ...
+    saeSoftmaxTheta, options);
+
+% reshape parameters into vector
+saeSoftmaxOptTheta = saeSoftmaxOptTheta(:);
+
 %%======================================================================
-%% STEP 5: Finetune softmax model
-
-% Implement the stackedAECost to give the combined cost of the whole model
-% then run this cell.
+%% STEP 4: FINETUNE THE MODEL
+% Fine tune the model, treating it as one large neural network.
 
 % Initialize the stack using the parameters learned
 stack = cell(2,1);
 stack{1}.w = reshape(SAE1opttheta(1:hiddenSizeL1*inputSize), ...
-                     hiddenSizeL1, inputSize);
-stack{1}.b = SAE1opttheta(2*hiddenSizeL1*inputSize+1:2*hiddenSizeL1*inputSize+hiddenSizeL1);
+    hiddenSizeL1, inputSize);
+stack{1}.b = SAE1opttheta(2*hiddenSizeL1*inputSize+1:2*hiddenSizeL1* ...
+    inputSize+hiddenSizeL1);
 stack{2}.w = reshape(SAE2opttheta(1:hiddenSizeL2*hiddenSizeL1), ...
-                     hiddenSizeL2, hiddenSizeL1);
-stack{2}.b = SAE2opttheta(2*hiddenSizeL2*hiddenSizeL1+1:2*hiddenSizeL2*hiddenSizeL1+hiddenSizeL2);
+    hiddenSizeL2, hiddenSizeL1);
+stack{2}.b = SAE2opttheta(2*hiddenSizeL2*hiddenSizeL1+1:2*hiddenSizeL2* ...
+    hiddenSizeL1+hiddenSizeL2);
 
 % Initialize the parameters for the deep model
 [stackparams, netconfig] = stack2params(stack);
 stackedAETheta = [ saeSoftmaxOptTheta ; stackparams ];
 
-%% ---------------------- YOUR CODE HERE  ---------------------------------
-%  Instructions: Train the deep network, hidden size here refers to the '
-%                dimension of the input to the classifier, which corresponds 
-%                to "hiddenSizeL2".
-%
-%
-
+options.maxIter = finetuneMaxIter;
 [stackedAEOptTheta, cost] = minFunc( @(p) stackedAECost(p, ...
-                                   inputSize, hiddenSizeL2, ...
-                                   numClasses, netconfig, ...
-                                   lambda, trainData, ...
-                                   trainLabels), ...
-                                   stackedAETheta, options);   
-                       
-
-
+    inputSize, hiddenSizeL2, numClasses, netconfig, lambda, trainData, ...
+    trainLabels), stackedAETheta, options);   
+                               
 %%======================================================================
-%% STEP 6: Test 
+%% STEP 5: Test 
 %  Instructions: You will need to complete the code in stackedAEPredict.m
 %                before running this part of the code
 %
 
-% Get labelled test images
-% Note that we apply the same kind of preprocessing as the training set
+% Get labelled test images: 10000 samples
 testData = loadMNISTImages('mnist/t10k-images-idx3-ubyte');
 testLabels = loadMNISTLabels('mnist/t10k-labels-idx1-ubyte');
 
-testLabels(testLabels == 0) = 10; % Remap 0 to 10
+% Remap 0 to 10
+testLabels(testLabels == 0) = 10; 
 
 [pred] = stackedAEPredict(stackedAETheta, inputSize, hiddenSizeL2, ...
                           numClasses, netconfig, testData);
@@ -142,12 +135,11 @@ acc = mean(testLabels(:) == pred(:));
 fprintf('After Finetuning Test Accuracy: %0.3f%%\n', acc * 100);
 
 % Accuracy is the proportion of correctly classified images
-% The results for our implementation were:
 %
+% Ideal:
 % Before Finetuning Test Accuracy: 87.7%
 % After Finetuning Test Accuracy:  97.6%
 %
-% If your values are too low (accuracy less than 95%), you should check 
-% your code for errors, and make sure you are training on the 
-% entire data set of 60000 28x28 training images 
-% (unless you modified the loading code, this should be the case)
+% My Implementation:
+% Before Finetuning Test Accuracy: 91.900%
+% After Finetuning Test Accuracy:  97.720% 
