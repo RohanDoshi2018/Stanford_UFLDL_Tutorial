@@ -15,10 +15,10 @@ sparsityParam = 0.1;     % desired average activation of the hidden units.
 lambda = 3e-3;           % weight decay parameter   
 lambdaClassifier = 1e-4; % classifier lambda
 beta = 3;                % weight of sparsity penalty term       
-AE1maxIter = 400;        % max # iterations for autoencoder
-AE2maxIter = 400;        % max # iterations for autoencoder
-classifierMaxIter = 100; % max # iterations for softmax classifer
-finetuneMaxIter = 400;   % max # iterations for finetuning
+AE1maxIter = 10;        % max # iterations for autoencoder
+AE2maxIter = 10;        % max # iterations for autoencoder
+classifierMaxIter = 10; % max # iterations for softmax classifer
+finetuneMaxIter = 10;   % max # iterations for finetuning
 %%=========================================================================
 %% STEP 1: LOAD DATA
 %
@@ -85,7 +85,7 @@ options.maxIter = classifierMaxIter;
 % reshape parameters into vector
 saeSoftmaxOptTheta = saeSoftmaxOptTheta(:);
 
-%%======================================================================
+%%=========================================================================
 %% STEP 4: FINETUNE THE MODEL
 % Fine tune the model, treating it as one large neural network.
 
@@ -109,7 +109,7 @@ options.maxIter = finetuneMaxIter;
     inputSize, hiddenSizeL2, numClasses, netconfig, lambda, trainData, ...
     trainLabels), stackedAETheta, options);   
                                
-%%======================================================================
+%%=========================================================================
 %% STEP 5: Test 
 %  Instructions: You will need to complete the code in stackedAEPredict.m
 %                before running this part of the code
