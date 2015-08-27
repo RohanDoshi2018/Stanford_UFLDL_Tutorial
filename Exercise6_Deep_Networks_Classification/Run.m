@@ -15,10 +15,11 @@ sparsityParam = 0.1;     % desired average activation of the hidden units.
 lambda = 3e-3;           % weight decay parameter   
 lambdaClassifier = 1e-4; % classifier lambda
 beta = 3;                % weight of sparsity penalty term       
-AE1maxIter = 10;        % max # iterations for autoencoder
-AE2maxIter = 10;        % max # iterations for autoencoder
-classifierMaxIter = 10; % max # iterations for softmax classifer
-finetuneMaxIter = 10;   % max # iterations for finetuning
+AE1maxIter = 400;        % max # iterations for autoencoder
+AE2maxIter = 400;        % max # iterations for autoencoder
+classifierMaxIter = 100; % max # iterations for softmax classifer
+finetuneMaxIter = 400;   % max # iterations for finetuning
+
 %%=========================================================================
 %% STEP 1: LOAD DATA
 %
@@ -136,10 +137,13 @@ fprintf('After Finetuning Test Accuracy: %0.3f%%\n', acc * 100);
 
 % Accuracy is the proportion of correctly classified images
 %
-% Ideal:
+% Results: 400 iterations for AE1, AE2, finetuning
+%          100 iterations for softmax classifier
+%
+% Stanford:
 % Before Finetuning Test Accuracy: 87.7%
 % After Finetuning Test Accuracy:  97.6%
 %
 % My Implementation:
-% Before Finetuning Test Accuracy: 91.900%
-% After Finetuning Test Accuracy:  97.720% 
+% Before Finetuning Test Accuracy: 91.930%
+% After Finetuning Test Accuracy:  97.820% 
