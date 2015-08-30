@@ -33,7 +33,7 @@ trainLabels = loadMNISTLabels('mnist/train-labels-idx1-ubyte');
 trainLabels(trainLabels == 0) = 10; 
 
 %%=========================================================================
-%% STEP 2: Train the first sparse autoencoder
+%% STEP 2: TRAIN THE FIRST AUTOENCODER
 % Trian the first sparse autoencoder on the unlabelled STL training
 % images.
 
@@ -51,7 +51,7 @@ options.maxIter = AE1maxIter;
     sae1Theta, options);    
 
 %%=========================================================================
-%% STEP 2: TRAIN THE SPRASE AUTOENCODER
+%% STEP 2: TRAIN THE SECOND AUTOENCODER
 % This trains the second sparse autoencoder on the first autoencoder
 % features.
 
